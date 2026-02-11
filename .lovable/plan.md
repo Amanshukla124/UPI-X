@@ -1,92 +1,87 @@
 
 
-# UPI X — Feature-Complete Prototype Plan
+# Phase 0: Foundation and Compliance Alignment
 
-## Overview
-Build a **feature-complete prototype** of UPI X — a secure mobile payment app for the Indian market — as a **Capacitor native app** with **Supabase backend** and **simulated/mock APIs** for UPI, KYC, NFC, and OTP services.
-
----
-
-## Phase 1: Foundation & Design System
-- Set up Capacitor for native iOS/Android builds
-- Configure the **UPI X design system**: Deep Blue (#1565C0) primary, Saffron Orange (#FF8F00) secondary, Green (#2E7D32) accent
-- Set up Inter font for headings, system fonts for body
-- Build reusable UI components: large touch targets, high-contrast elements, offline indicators, loading states
-- Configure Supabase (Lovable Cloud) for auth, database, and storage
-- Set up bottom tab navigation (Home, Scan, Wallet, History, Menu) and hamburger menu
-
-## Phase 2: Onboarding & Authentication Flow
-- **Splash screen** (`/splash`): Logo, loading animation, connectivity check, auto-redirect logic
-- **Onboarding carousel** (`/onboarding`): Swipeable feature introduction cards with skip/next
-- **Phone verification** (`/phone-verify`): Phone input with country code (+91 default), simulated OTP send
-- **OTP verification** (`/otp-verify`): 6-digit input with auto-focus, countdown timer, resend, simulated verification
-- Supabase auth integration for user registration and session management
-
-## Phase 3: KYC & Wallet Setup
-- **KYC setup** (`/kyc-setup`): Document type selector (Aadhaar/PAN), camera/gallery upload, simulated document verification with progress tracking
-- **Wallet setup** (`/wallet-setup`): Funding source selection (UPI, cards), minimum balance info, regulatory notices
-- Store KYC status and wallet configuration in Supabase database
-
-## Phase 4: Dashboard & Core Navigation
-- **Main dashboard** (`/dashboard`): Wallet balance card, quick action buttons (Pay/Request), recent transactions list, offline status indicator
-- Tutorial overlay for first-time users
-- Bottom tab bar navigation fully wired
-- Hamburger menu with Profile, Security, Support, Language, Logout
-
-## Phase 5: Payment Flows
-- **QR Scanner** (`/scan-pay`): Camera viewfinder with scan overlay, simulated QR decode, manual merchant ID entry, amount input
-- **Payment confirmation** (`/payment-confirm`): Merchant details, amount breakdown, payment method selector, PIN/biometric prompt
-- **Transaction success** (`/transaction-success`): Animated success state, transaction details, receipt sharing
-- **Transaction failed** (`/transaction-failed`): Error messaging, retry button, support shortcut
-- Simulated online UPI processing and offline digital token generation
-
-## Phase 6: Wallet Management
-- **Wallet page** (`/wallet`): Balance display, transaction history, spending limits, add money and withdrawal options
-- **Add money** (`/add-money`): Amount input, funding source selection, fee breakdown, simulated payment processing
-- Balance updates and regulatory limit indicators stored in Supabase
-
-## Phase 7: Transaction History
-- **History page** (`/history`): Filterable/searchable transaction list with date filters, status badges (completed, pending, failed), pagination
-- **Transaction detail** (`/transaction-detail`): Full transaction info, receipt download, dispute option, status timeline
-- All transaction data stored and queried from Supabase
-
-## Phase 8: Offline Capabilities
-- Service Worker setup for offline-first architecture
-- IndexedDB for local transaction and data storage
-- Simulated offline token generation and double-spending prevention logic
-- Auto-sync mechanism: detect connectivity restoration, queue processing, status updates
-- Offline status indicators throughout the app
-- Pre-cached help articles and FAQs for offline support
-
-## Phase 9: Profile, Settings & Security
-- **Profile** (`/profile`): Photo, personal info, KYC status badges, device management
-- **Settings** (`/settings`): Notification preferences, language selection (English/Hindi), biometric toggle, logout
-- **Security** (`/security`): PIN change, simulated biometric setup, device list, login history, privacy toggles
-- Device binding logic with simulated tamper detection
-
-## Phase 10: Support & Notifications
-- **Support page** (`/support`): Expandable FAQ categories, search, simulated live chat widget, contact options
-- **Offline help** (`/offline-help`): Pre-cached articles, troubleshooting guides, contact info
-- Push notification setup via Capacitor for transaction confirmations, balance alerts, security notifications
-
-## Phase 11: Multi-language & Polish
-- Hindi and English language support with language switcher
-- Final responsive design polish for various screen sizes
-- Accessibility review (contrast ratios, touch targets, screen reader support)
-- Performance optimization for low-end devices
+This phase establishes the project foundation -- design system, Capacitor setup, Supabase configuration, and compliance documentation -- before any feature screens are built.
 
 ---
 
-## Backend (Supabase / Lovable Cloud)
-- **Auth**: Phone-based authentication with session management
-- **Database tables**: Users, wallets, transactions, KYC documents, devices, support tickets
-- **Storage**: KYC document uploads, profile photos
-- **Edge Functions**: Simulated UPI processing, token generation/validation, sync processing
-- **Row Level Security**: User-scoped data access for all tables
+## Step 1: Design System Configuration
 
-## Key Notes
-- All external integrations (UPI, NFC, Aadhaar KYC, SMS OTP) will be **simulated with realistic mock APIs** — ready to swap for real providers later
-- NFC and Bluetooth interactions will use **simulated device pairing flows** since web/Capacitor support is limited
-- Cryptographic token logic will be implemented with web crypto APIs but with **simulated validation**
-- The app is structured so real API providers can be plugged in without UI changes
+Update the CSS variables and Tailwind config to match the UPI X brand:
+
+- **Primary**: Deep Blue (#1565C0) -> HSL 207, 90%, 37%
+- **Secondary**: Saffron Orange (#FF8F00) -> HSL 34, 100%, 50%
+- **Accent/Success**: Green (#2E7D32) -> HSL 125, 46%, 34%
+- **Destructive**: Red for errors/failures
+- Add custom CSS variables for `--upi-blue`, `--upi-orange`, `--upi-green` for direct use
+- Set Inter as the heading font via Google Fonts import
+- Update `index.html` title, meta tags, and description to "UPI X"
+
+## Step 2: Capacitor Native App Setup
+
+- Install `@capacitor/core`, `@capacitor/cli`, `@capacitor/ios`, `@capacitor/android`
+- Initialize Capacitor with `capacitor.config.ts` pointing to the project sandbox preview URL for hot-reload
+- App ID: `app.lovable.79a1b22eb2b84b0196c3ddc952dcd983`
+
+## Step 3: Bottom Tab Navigation Shell
+
+Create a mobile app layout with a persistent bottom tab bar:
+
+- **Home** (/) - Dashboard placeholder
+- **Scan** (/scan-pay) - QR scanner placeholder
+- **Wallet** (/wallet) - Wallet placeholder
+- **History** (/history) - Transaction history placeholder
+- **Menu** (/menu) - Profile/settings placeholder
+
+Each tab will render a simple placeholder page for now. Routes will be wired in `App.tsx`.
+
+## Step 4: Compliance & Architecture Documentation
+
+Create a `docs/compliance.md` file capturing:
+
+- Offline wallet limits (per NPCI/RBI UPI Lite guidelines): max Rs 2,000 per transaction, max Rs 5,000 wallet balance
+- Token expiry rules: offline tokens expire after 48 hours
+- Settlement window: offline transactions must settle within 24 hours of connectivity restoration
+- KYC tiers: minimum KYC (Rs 10,000 limit), full KYC (Rs 1,00,000 limit)
+- Data encryption requirements: AES-256 at rest, TLS 1.3 in transit
+- Device binding: one active device per wallet
+- Simulated API note: all external integrations are mocked for prototype
+
+## Step 5: Threat Model Documentation
+
+Create `docs/threat-model.md` covering:
+
+- Double-spend prevention: token serial numbers, device-bound tokens, server reconciliation on sync
+- Replay attack mitigation: timestamp + nonce in token payload
+- Device compromise: tamper detection flags, remote device deactivation
+- Man-in-the-middle: TLS pinning (noted for real implementation)
+- Custody model: escrow-based -- funds locked in wallet before offline token issuance
+
+---
+
+## Technical Details
+
+### Files Created/Modified
+
+| File | Action |
+|------|--------|
+| `src/index.css` | Update CSS variables for UPI X color palette |
+| `tailwind.config.ts` | Add UPI X custom colors |
+| `index.html` | Update title, meta, add Inter font |
+| `src/App.tsx` | Add routes for all tab pages |
+| `src/components/layout/MobileLayout.tsx` | New -- bottom tab bar layout wrapper |
+| `src/components/layout/BottomTabBar.tsx` | New -- tab bar component with 5 tabs |
+| `src/pages/Dashboard.tsx` | New -- placeholder |
+| `src/pages/ScanPay.tsx` | New -- placeholder |
+| `src/pages/Wallet.tsx` | New -- placeholder |
+| `src/pages/History.tsx` | New -- placeholder |
+| `src/pages/Menu.tsx` | New -- placeholder |
+| `capacitor.config.ts` | New -- Capacitor configuration |
+| `docs/compliance.md` | New -- regulatory rules and limits |
+| `docs/threat-model.md` | New -- security threat model |
+
+### No Backend Changes
+
+Phase 0 is purely frontend foundation and documentation. Supabase setup will begin in Phase 1 when auth is needed.
 
