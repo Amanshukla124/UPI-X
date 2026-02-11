@@ -1,4 +1,6 @@
 import { User, Shield, HelpCircle, Globe, LogOut, ChevronRight } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const menuItems = [
   { icon: User, label: "Profile", desc: "Manage your account" },
@@ -8,6 +10,13 @@ const menuItems = [
 ];
 
 const Menu = () => {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/splash", { replace: true });
+  };
   return (
     <div className="flex flex-col p-4 gap-6">
       <header className="pt-2">
@@ -32,7 +41,7 @@ const Menu = () => {
         ))}
       </div>
 
-      <button className="flex items-center gap-3 rounded-xl bg-destructive/10 p-4 text-destructive mt-4 active:bg-destructive/20 transition-colors">
+      <button onClick={handleLogout} className="flex items-center gap-3 rounded-xl bg-destructive/10 p-4 text-destructive mt-4 active:bg-destructive/20 transition-colors">
         <LogOut className="h-5 w-5" />
         <span className="text-sm font-medium">Log Out</span>
       </button>
