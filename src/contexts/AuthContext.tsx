@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 
-type AuthStep = "splash" | "onboarding" | "phone-verify" | "otp-verify" | "authenticated";
+type AuthStep = "splash" | "onboarding" | "phone-verify" | "otp-verify" | "kyc-setup" | "wallet-setup" | "authenticated";
 
 interface AuthState {
   step: AuthStep;
@@ -14,6 +14,8 @@ interface AuthContextType {
   completeOnboarding: () => void;
   sendOtp: (phone: string) => Promise<boolean>;
   verifyOtp: (otp: string) => Promise<boolean>;
+  completeKyc: () => void;
+  completeWalletSetup: () => void;
   logout: () => void;
   goToStep: (step: AuthStep) => void;
 }
@@ -64,10 +66,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Simulated OTP verification — accepts "123456" or any 6-digit code
     await new Promise(resolve => setTimeout(resolve, 600));
     if (otp.length === 6) {
-      setState({ step: "authenticated", phone: state.phone, isAuthenticated: true });
+      setState(prev => ({ ...prev, step: "kyc-setup" }));
       return true;
     }
     return false;
+  }, [state.phone]);
+
+  const completeKyc = useCallback(() => {
+    setState(prev => ({ ...prev, step: "wallet-setup" }));
+  }, []);
+
+  const completeWalletSetup = useCallback(() => {
+    setState({ step: "authenticated", phone: state.phone, isAuthenticated: true });
   }, [state.phone]);
 
   const logout = useCallback(() => {
@@ -80,7 +90,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   return (
-    <AuthContext.Provider value={{ state, setPhone, completeOnboarding, sendOtp, verifyOtp, logout, goToStep }}>
+    <AuthContext.Provider value={{ state, setPhone, completeOnboarding, sendOtp, verifyOtp, completeKyc, completeWalletSetup, logout, goToStep }}>
       {children}
     </AuthContext.Provider>
   );
