@@ -15,6 +15,8 @@ import ScanPay from "./pages/ScanPay";
 import Wallet from "./pages/Wallet";
 import History from "./pages/History";
 import Menu from "./pages/Menu";
+import KycSetup from "./pages/KycSetup";
+import WalletSetup from "./pages/WalletSetup";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +34,8 @@ const App = () => (
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/phone-verify" element={<PhoneVerify />} />
             <Route path="/otp-verify" element={<OtpVerify />} />
+            <Route path="/kyc-setup" element={<KycSetup />} />
+            <Route path="/wallet-setup" element={<WalletSetup />} />
 
             {/* Protected app routes */}
             <Route element={<AuthGuard><MobileLayout /></AuthGuard>}>

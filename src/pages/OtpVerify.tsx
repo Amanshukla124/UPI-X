@@ -75,7 +75,7 @@ const OtpVerify = () => {
     try {
       const success = await verifyOtp(code);
       if (success) {
-        navigate("/", { replace: true });
+        navigate("/kyc-setup", { replace: true });
       } else {
         setError("Invalid OTP. Please try again.");
         setOtp(Array(OTP_LENGTH).fill(""));
