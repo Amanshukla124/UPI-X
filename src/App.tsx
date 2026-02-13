@@ -21,6 +21,7 @@ import WalletSetup from "./pages/WalletSetup";
 import PaymentConfirm from "./pages/PaymentConfirm";
 import TransactionSuccess from "./pages/TransactionSuccess";
 import TransactionFailed from "./pages/TransactionFailed";
+import OfflinePay from "./pages/OfflinePay";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -52,6 +53,7 @@ const App = () => (
                 <Route path="/payment-confirm" element={<PaymentConfirm />} />
                 <Route path="/transaction-success" element={<TransactionSuccess />} />
                 <Route path="/transaction-failed" element={<TransactionFailed />} />
+                <Route path="/offline-pay" element={<OfflinePay />} />
               </Route>
 
               <Route path="*" element={<NotFound />} />
