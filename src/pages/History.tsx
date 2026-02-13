@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { Clock, ArrowDownLeft, ArrowUpRight, Search } from "lucide-react";
+import { Clock, ArrowDownLeft, ArrowUpRight, Search, WifiOff } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useTransactions, type Transaction } from "@/contexts/TransactionContext";
 
 const History = () => {
   const { transactions } = useTransactions();
   const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState<"all" | "completed" | "failed">("all");
+  const [filter, setFilter] = useState<"all" | "completed" | "pending" | "failed">("all");
 
   const filtered = transactions.filter(tx => {
     if (filter !== "all" && tx.status !== filter) return false;
@@ -20,7 +20,6 @@ const History = () => {
         <h1 className="text-2xl font-bold">Transaction History</h1>
       </header>
 
-      {/* Search */}
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
@@ -31,9 +30,8 @@ const History = () => {
         />
       </div>
 
-      {/* Filters */}
       <div className="flex gap-2">
-        {(["all", "completed", "failed"] as const).map(f => (
+        {(["all", "completed", "pending", "failed"] as const).map(f => (
           <button
             key={f}
             onClick={() => setFilter(f)}
@@ -48,7 +46,6 @@ const History = () => {
         ))}
       </div>
 
-      {/* Transaction List */}
       {filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
           <Clock className="h-10 w-10 mb-2 opacity-40" />
@@ -68,22 +65,41 @@ const History = () => {
 const TransactionRow = ({ tx }: { tx: Transaction }) => (
   <div className="flex items-center gap-3 p-3 rounded-xl border border-border bg-card">
     <div className={`h-9 w-9 rounded-full flex items-center justify-center ${
-      tx.status === "completed" ? "bg-accent/20" : "bg-destructive/20"
+      tx.status === "completed" ? "bg-accent/20"
+      : tx.status === "pending" ? "bg-secondary/20"
+      : "bg-destructive/20"
     }`}>
-      {tx.status === "completed"
-        ? <ArrowUpRight className="h-4 w-4 text-accent" />
-        : <ArrowDownLeft className="h-4 w-4 text-destructive" />
+      {tx.status === "pending"
+        ? <WifiOff className="h-4 w-4 text-secondary" />
+        : tx.status === "completed"
+          ? <ArrowUpRight className="h-4 w-4 text-accent" />
+          : <ArrowDownLeft className="h-4 w-4 text-destructive" />
       }
     </div>
     <div className="flex-1 min-w-0">
-      <p className="text-sm font-medium truncate">{tx.merchantName}</p>
+      <div className="flex items-center gap-1.5">
+        <p className="text-sm font-medium truncate">{tx.merchantName}</p>
+        {tx.type === "offline" && (
+          <span className="text-[10px] bg-secondary/20 text-secondary px-1.5 rounded shrink-0">offline</span>
+        )}
+      </div>
       <p className="text-xs text-muted-foreground">{tx.timestamp.toLocaleString()}</p>
     </div>
     <div className="text-right">
-      <p className={`text-sm font-bold ${tx.status === "completed" ? "text-accent" : "text-destructive"}`}>
+      <p className={`text-sm font-bold ${
+        tx.status === "completed" ? "text-accent"
+        : tx.status === "pending" ? "text-secondary"
+        : "text-destructive"
+      }`}>
         ₹{tx.amount.toFixed(2)}
       </p>
-      <p className="text-xs text-muted-foreground font-mono">{tx.id.slice(-8)}</p>
+      <p className={`text-xs capitalize ${
+        tx.status === "completed" ? "text-accent"
+        : tx.status === "pending" ? "text-secondary"
+        : "text-destructive"
+      }`}>
+        {tx.status}
+      </p>
     </div>
   </div>
 );

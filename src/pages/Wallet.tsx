@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { Wallet as WalletIcon, Plus, ArrowUpRight, ArrowDownLeft } from "lucide-react";
+import { Wallet as WalletIcon, Plus, ArrowUpRight, ArrowDownLeft, WifiOff, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useTransactions } from "@/contexts/TransactionContext";
 
 const Wallet = () => {
-  const { walletBalance, transactions, addMoney } = useTransactions();
+  const { walletBalance, transactions, addMoney, offlineBalance, pendingTokens } = useTransactions();
   const [showAddMoney, setShowAddMoney] = useState(false);
   const [addAmount, setAddAmount] = useState("");
 
@@ -76,6 +76,21 @@ const Wallet = () => {
         </section>
       )}
 
+      {/* Offline Tokens Section */}
+      {pendingTokens.length > 0 && (
+        <section className="rounded-xl border border-secondary bg-secondary/10 p-4 space-y-2">
+          <div className="flex items-center gap-2">
+            <Clock className="h-4 w-4 text-secondary" />
+            <h3 className="text-sm font-semibold">Pending Offline Tokens</h3>
+          </div>
+          <p className="text-xs text-muted-foreground">{pendingTokens.length} token{pendingTokens.length > 1 ? "s" : ""} awaiting settlement</p>
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Locked amount</span>
+            <span className="font-semibold text-secondary">₹{offlineBalance.toFixed(0)}</span>
+          </div>
+        </section>
+      )}
+
       {/* Spending Limits */}
       <section className="rounded-xl border border-border bg-card p-4 space-y-2">
         <h3 className="text-sm font-semibold">Limits</h3>
@@ -86,6 +101,10 @@ const Wallet = () => {
         <div className="flex justify-between text-sm">
           <span className="text-muted-foreground">Offline wallet cap</span>
           <span>₹5,000</span>
+        </div>
+        <div className="flex justify-between text-sm">
+          <span className="text-muted-foreground">Offline balance used</span>
+          <span className={offlineBalance > 0 ? "text-secondary font-medium" : ""}>₹{offlineBalance.toFixed(0)} / ₹5,000</span>
         </div>
       </section>
 
