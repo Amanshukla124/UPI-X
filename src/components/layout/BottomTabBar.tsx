@@ -1,16 +1,19 @@
 import { Home, ScanLine, Wallet, Clock, Menu } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { cn } from "@/lib/utils";
-
-const tabs = [
-  { to: "/", icon: Home, label: "Home" },
-  { to: "/scan-pay", icon: ScanLine, label: "Scan" },
-  { to: "/wallet", icon: Wallet, label: "Wallet" },
-  { to: "/history", icon: Clock, label: "History" },
-  { to: "/menu", icon: Menu, label: "Menu" },
-];
+import { useI18n } from "@/contexts/I18nContext";
 
 const BottomTabBar = () => {
+  const { t } = useI18n();
+
+  const tabs = [
+    { to: "/", icon: Home, label: t("dashboard.greeting").split(" ")[0] === "सुप्रभात" ? "होम" : "Home" },
+    { to: "/scan-pay", icon: ScanLine, label: t("dashboard.greeting").split(" ")[0] === "सुप्रभात" ? "स्कैन" : "Scan" },
+    { to: "/wallet", icon: Wallet, label: t("wallet.title") },
+    { to: "/history", icon: Clock, label: t("dashboard.greeting").split(" ")[0] === "सुप्रभात" ? "इतिहास" : "History" },
+    { to: "/menu", icon: Menu, label: t("menu.title") },
+  ];
+
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card safe-bottom">
       <div className="flex items-center justify-around h-16">
