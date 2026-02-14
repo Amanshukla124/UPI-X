@@ -1,15 +1,23 @@
 import { useNavigate } from "react-router-dom";
-import { Wallet, Send, QrCode, WifiOff, RefreshCw, Clock } from "lucide-react";
+import { Wallet, Send, QrCode, WifiOff, RefreshCw, Clock, CheckCircle2, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import { useTransactions } from "@/contexts/TransactionContext";
+import { useAutoSync } from "@/hooks/useAutoSync";
 import { useConnectivity } from "@/hooks/useConnectivity";
 import { useState } from "react";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { transactions, walletBalance, offlineBalance, pendingTokens, syncOfflineTransactions } = useTransactions();
+  const { transactions, walletBalance, offlineBalance, pendingTokens, syncOfflineTransactions, lastSyncReport } = useTransactions();
   const { isOnline, simulatedOffline, toggleSimulatedOffline } = useConnectivity();
   const [syncing, setSyncing] = useState(false);
+
+  // Auto-sync on connectivity restoration
+  const { syncStatus, progress, triggerSync } = useAutoSync((report) => {
+    // Force refresh after auto-sync completes — context already updated via syncOfflineTransactions
+  });
+
   const recent = transactions.slice(0, 5);
 
   const handleSync = async () => {
@@ -17,6 +25,8 @@ const Dashboard = () => {
     await syncOfflineTransactions();
     setSyncing(false);
   };
+
+  const isSyncing = syncing || syncStatus === "syncing";
 
   return (
     <div className="flex flex-col p-4 gap-6">
@@ -27,7 +37,6 @@ const Dashboard = () => {
           <h1 className="text-2xl font-bold">UPI X</h1>
         </div>
         <div className="flex items-center gap-2">
-          {/* Connectivity toggle for testing */}
           <button
             onClick={toggleSimulatedOffline}
             className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium transition-colors ${
@@ -60,17 +69,61 @@ const Dashboard = () => {
         )}
       </section>
 
+      {/* Auto-Sync Progress Banner */}
+      {isSyncing && (
+        <section className="rounded-xl border border-primary bg-primary/10 p-4 space-y-2 animate-fade-in">
+          <div className="flex items-center gap-2">
+            <RefreshCw className="h-4 w-4 text-primary animate-spin" />
+            <p className="text-sm font-semibold">Syncing offline payments…</p>
+          </div>
+          <Progress value={progress.total > 0 ? (progress.settled / progress.total) * 100 : 0} className="h-2" />
+          <p className="text-xs text-muted-foreground">
+            {progress.settled} of {progress.total} settled
+          </p>
+        </section>
+      )}
+
+      {/* Sync Complete Banner */}
+      {!isSyncing && lastSyncReport && lastSyncReport.total > 0 && (
+        <section className="rounded-xl border border-accent bg-accent/10 p-4 animate-fade-in">
+          <div className="flex items-center gap-2 mb-1">
+            <CheckCircle2 className="h-4 w-4 text-accent" />
+            <p className="text-sm font-semibold">Sync Complete</p>
+          </div>
+          <div className="flex gap-4 text-xs text-muted-foreground">
+            <span className="text-accent font-medium">{lastSyncReport.settled} settled</span>
+            {lastSyncReport.failed > 0 && (
+              <span className="text-destructive font-medium">{lastSyncReport.failed} failed</span>
+            )}
+            {lastSyncReport.expired > 0 && (
+              <span className="text-secondary font-medium">{lastSyncReport.expired} expired</span>
+            )}
+          </div>
+        </section>
+      )}
+
       {/* Pending Sync Banner */}
-      {pendingTokens.length > 0 && isOnline && (
+      {!isSyncing && pendingTokens.length > 0 && isOnline && (
         <section className="rounded-xl border border-secondary bg-secondary/10 p-4 flex items-center justify-between">
           <div>
             <p className="text-sm font-semibold">{pendingTokens.length} offline payment{pendingTokens.length > 1 ? "s" : ""}</p>
             <p className="text-xs text-muted-foreground">Ready to settle</p>
           </div>
-          <Button size="sm" onClick={handleSync} disabled={syncing} className="gap-1">
-            <RefreshCw className={`h-4 w-4 ${syncing ? "animate-spin" : ""}`} />
-            {syncing ? "Syncing…" : "Sync Now"}
+          <Button size="sm" onClick={handleSync} disabled={isSyncing} className="gap-1">
+            <RefreshCw className="h-4 w-4" />
+            Sync Now
           </Button>
+        </section>
+      )}
+
+      {/* Offline Pending (when offline) */}
+      {!isOnline && pendingTokens.length > 0 && (
+        <section className="rounded-xl border border-muted bg-muted/50 p-4 flex items-center gap-3">
+          <AlertTriangle className="h-5 w-5 text-secondary shrink-0" />
+          <div>
+            <p className="text-sm font-semibold">{pendingTokens.length} pending payment{pendingTokens.length > 1 ? "s" : ""}</p>
+            <p className="text-xs text-muted-foreground">Will auto-sync when you're back online</p>
+          </div>
         </section>
       )}
 
