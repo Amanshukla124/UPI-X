@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useCallback } from "react";
 import { generateToken, storeToken, markTokenSpent, getPendingTokens, clearExpiredTokens, type OfflineToken } from "@/services/tokenEngine";
+import { runFullSync, saveLastSyncReport, type SyncReport } from "@/services/syncEngine";
 
 export interface Transaction {
   id: string;
@@ -24,8 +25,9 @@ interface TransactionContextType {
   confirmOfflinePayment: () => Promise<OfflineToken | null>;
   clearPendingPayment: () => void;
   addMoney: (amount: number) => void;
-  syncOfflineTransactions: () => Promise<number>;
+  syncOfflineTransactions: () => Promise<SyncReport>;
   refreshPendingTokens: () => void;
+  lastSyncReport: SyncReport | null;
 }
 
 interface PendingPayment {
@@ -56,6 +58,7 @@ export const TransactionProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const [walletBalance, setWalletBalance] = useState(5000);
   const [offlineBalance, setOfflineBalance] = useState(0);
   const [pendingTokens, setPendingTokens] = useState<OfflineToken[]>(() => getPendingTokens());
+  const [lastSyncReport, setLastSyncReport] = useState<SyncReport | null>(null);
 
   const refreshPendingTokens = useCallback(() => {
     clearExpiredTokens();
@@ -126,38 +129,32 @@ export const TransactionProvider: React.FC<{ children: React.ReactNode }> = ({ c
     return token;
   }, [pendingPayment, walletBalance, offlineBalance, refreshPendingTokens]);
 
-  // Sync offline transactions (simulate settlement)
-  const syncOfflineTransactions = useCallback(async (): Promise<number> => {
-    const tokens = getPendingTokens();
-    if (tokens.length === 0) return 0;
+  // Full sync with retry engine
+  const syncOfflineTransactions = useCallback(async (): Promise<SyncReport> => {
+    const report = await runFullSync();
 
-    let settled = 0;
-    for (const token of tokens) {
-      await new Promise(r => setTimeout(r, 500));
-      // 95% settlement success
-      const success = Math.random() > 0.05;
+    saveLastSyncReport(report);
+    setLastSyncReport(report);
 
-      markTokenSpent(token.id);
-
+    // Update transaction statuses based on results
+    for (const result of report.results) {
       setTransactions(prev =>
         prev.map(tx =>
-          tx.tokenId === token.id
-            ? { ...tx, status: success ? "completed" : "failed" }
+          tx.tokenId === result.tokenId
+            ? { ...tx, status: result.success ? "completed" : "failed", note: result.reason }
             : tx
         )
       );
 
-      if (success) {
-        settled++;
-      } else {
-        // Refund failed settlement
-        setWalletBalance(prev => prev + token.amount);
+      // Refund failed/expired settlements
+      if (!result.success) {
+        setWalletBalance(prev => prev + result.amount);
       }
-      setOfflineBalance(prev => Math.max(0, prev - token.amount));
+      setOfflineBalance(prev => Math.max(0, prev - result.amount));
     }
 
     refreshPendingTokens();
-    return settled;
+    return report;
   }, [refreshPendingTokens]);
 
   const clearPendingPayment = useCallback(() => setPendingPayment(null), []);
@@ -170,7 +167,7 @@ export const TransactionProvider: React.FC<{ children: React.ReactNode }> = ({ c
     <TransactionContext.Provider value={{
       transactions, pendingPayment, walletBalance, offlineBalance, pendingTokens,
       initPayment, confirmPayment, confirmOfflinePayment, clearPendingPayment,
-      addMoney, syncOfflineTransactions, refreshPendingTokens
+      addMoney, syncOfflineTransactions, refreshPendingTokens, lastSyncReport
     }}>
       {children}
     </TransactionContext.Provider>
