@@ -4,6 +4,7 @@ import { ShieldCheck, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useTransactions } from "@/contexts/TransactionContext";
+import { verifyPin, isPinSet } from "@/services/securityService";
 
 const PaymentConfirm = () => {
   const navigate = useNavigate();
@@ -21,6 +22,10 @@ const PaymentConfirm = () => {
 
   const handleConfirm = async () => {
     if (pin.length !== 4) { setError("Enter 4-digit PIN"); return; }
+    if (isPinSet()) {
+      const valid = await verifyPin(pin);
+      if (!valid) { setError("Incorrect PIN"); return; }
+    }
     setProcessing(true);
     setError("");
     const success = await confirmPayment();

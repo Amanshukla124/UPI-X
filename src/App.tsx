@@ -25,6 +25,7 @@ import TransactionFailed from "./pages/TransactionFailed";
 import OfflinePay from "./pages/OfflinePay";
 import Support from "./pages/Support";
 import LanguageSettings from "./pages/LanguageSettings";
+import Security from "./pages/Security";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -60,6 +61,7 @@ const App = () => (
                   <Route path="/offline-pay" element={<OfflinePay />} />
                   <Route path="/support" element={<Support />} />
                   <Route path="/language" element={<LanguageSettings />} />
+                  <Route path="/security" element={<Security />} />
                 </Route>
 
                 <Route path="*" element={<NotFound />} />
