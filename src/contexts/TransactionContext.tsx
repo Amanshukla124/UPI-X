@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useCallback } from "react";
 import { generateToken, storeToken, markTokenSpent, getPendingTokens, clearExpiredTokens, type OfflineToken } from "@/services/tokenEngine";
 import { runFullSync, saveLastSyncReport, type SyncReport } from "@/services/syncEngine";
+import { recordAudit } from "@/services/auditService";
 
 export interface Transaction {
   id: string;
@@ -91,6 +92,7 @@ export const TransactionProvider: React.FC<{ children: React.ReactNode }> = ({ c
     if (success) {
       setWalletBalance(prev => prev - pendingPayment.amount);
     }
+    recordAudit("transaction", success ? "payment_completed" : "payment_failed", `₹${pendingPayment.amount} to ${pendingPayment.merchantName}`);
     return success;
   }, [pendingPayment, walletBalance]);
 
@@ -125,6 +127,7 @@ export const TransactionProvider: React.FC<{ children: React.ReactNode }> = ({ c
     setWalletBalance(prev => prev - pendingPayment.amount);
     setOfflineBalance(prev => prev + pendingPayment.amount);
     refreshPendingTokens();
+    recordAudit("transaction", "offline_token_generated", `₹${pendingPayment.amount} to ${pendingPayment.merchantName}, token ${token.id}`);
 
     return token;
   }, [pendingPayment, walletBalance, offlineBalance, refreshPendingTokens]);
@@ -154,6 +157,7 @@ export const TransactionProvider: React.FC<{ children: React.ReactNode }> = ({ c
     }
 
     refreshPendingTokens();
+    recordAudit("sync", "sync_completed", `Total: ${report.total}, Settled: ${report.settled}, Failed: ${report.failed}`);
     return report;
   }, [refreshPendingTokens]);
 
@@ -161,6 +165,7 @@ export const TransactionProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
   const addMoney = useCallback((amount: number) => {
     setWalletBalance(prev => prev + amount);
+    recordAudit("wallet", "funds_added", `₹${amount} added to wallet`);
   }, []);
 
   return (
