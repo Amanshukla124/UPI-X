@@ -98,6 +98,8 @@ const translations: Record<Language, Record<string, string>> = {
     "menu.support": "Support",
     "menu.support_desc": "Help & FAQs",
     "menu.language": "Language",
+    "menu.compliance": "Compliance",
+    "menu.compliance_desc": "Audit & reporting",
     "menu.language_desc": "English",
     "menu.logout": "Log Out",
 
@@ -228,6 +230,8 @@ const translations: Record<Language, Record<string, string>> = {
     "menu.support": "सहायता",
     "menu.support_desc": "मदद और FAQ",
     "menu.language": "भाषा",
+    "menu.compliance": "अनुपालन",
+    "menu.compliance_desc": "ऑडिट और रिपोर्टिंग",
     "menu.language_desc": "हिंदी",
     "menu.logout": "लॉग आउट",
 

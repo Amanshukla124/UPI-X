@@ -1,4 +1,4 @@
-import { User, Shield, HelpCircle, Globe, LogOut, ChevronRight } from "lucide-react";
+import { User, Shield, HelpCircle, Globe, LogOut, ChevronRight, ClipboardList } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useI18n } from "@/contexts/I18nContext";
 import { useNavigate } from "react-router-dom";
@@ -11,6 +11,7 @@ const Menu = () => {
   const menuItems = [
     { icon: User, label: t("menu.profile"), desc: t("menu.profile_desc"), route: null },
     { icon: Shield, label: t("menu.security"), desc: t("menu.security_desc"), route: "/security" },
+    { icon: ClipboardList, label: t("menu.compliance"), desc: t("menu.compliance_desc"), route: "/compliance" },
     { icon: HelpCircle, label: t("menu.support"), desc: t("menu.support_desc"), route: "/support" },
     { icon: Globe, label: t("menu.language"), desc: language === "hi" ? "हिंदी" : "English", route: "/language" },
   ];
