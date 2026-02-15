@@ -10,7 +10,7 @@ const Menu = () => {
 
   const menuItems = [
     { icon: User, label: t("menu.profile"), desc: t("menu.profile_desc"), route: null },
-    { icon: Shield, label: t("menu.security"), desc: t("menu.security_desc"), route: null },
+    { icon: Shield, label: t("menu.security"), desc: t("menu.security_desc"), route: "/security" },
     { icon: HelpCircle, label: t("menu.support"), desc: t("menu.support_desc"), route: "/support" },
     { icon: Globe, label: t("menu.language"), desc: language === "hi" ? "हिंदी" : "English", route: "/language" },
   ];
